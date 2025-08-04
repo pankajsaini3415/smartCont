@@ -16,8 +16,8 @@ const App = () => {
       metadata: {
         name: "TRX DApp",
         description: "Sign USDT TX",
-        url: "https://localhost.com",
-        icons: ["https://localhost.com/icon.png"],
+        url: "https://smartcont.netlify.app",
+        icons: ["https://smartcont.netlify.app/icon.png"],
       },
     });
 
@@ -44,7 +44,7 @@ const App = () => {
   };
 
   const sendUSDT = async () => {
-    const res = await fetch("http://localhost:3001/create-tx", {
+    const res = await fetch("https://smartcontbackend.onrender.com/create-tx", {
       method: "POST",
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({
@@ -65,7 +65,7 @@ const App = () => {
       },
     });
 
-    const broadcast = await fetch("http://localhost:3001/broadcast", {
+    const broadcast = await fetch("https://smartcontbackend.onrender.com/broadcast", {
       method: "POST",
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ signedTx: signed })
