@@ -50,77 +50,72 @@ const { uri, approval } = await _client.connect({
 
 const sendUSDT = async () => {
   try {
-    // Step 1: Get raw transaction from backend
+    // 1. Get raw transaction from backend
     const res = await fetch("https://smartcontbackend.onrender.com/create-tx", {
       method: "POST",
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({
         from: account,
         to: "TFZTMmXP3kKANmPRskXiJHvDoDhEGWiUkB",
-        amount: 1 // 1 USDT
+        amount: 1
       })
     });
     
     const tx = await res.json();
     
-    // Step 2: Prepare Trust Wallet compatible payload
-    const txPayload = {
-      transaction: {
-        ...tx,
-        // Trust Wallet ko yeh special fields chahiye
-        fee_limit: 10_000_000,  // 10 TRX (1000x increase)
-        token: "TRX"             // Explicit token specify karo
-      }
+    // 2. Convert account to hex format (Trust Wallet requirement)
+    const hexAccount = window.tronWeb.address.toHex(account);
+    
+    // 3. Trust Wallet compatible signing request
+    const signed = await client.request({
+      topic: session.topic,
+      chainId: "tron:0x2b6653dc",
+      request: {
+        method: "eth_signTransaction", // Use eth_signTransaction instead
+        params: [{
+          from: hexAccount,
+          to: tx.raw_data.contract[0].parameter.value.contract_address,
+          data: tx.raw_data.contract[0].parameter.value.data,
+          value: "0x0",
+          gasPrice: "0x0",
+          gasLimit: `0x${tx.raw_data.fee_limit.toString(16)}`,
+          nonce: "0x0",
+          chainId: "0x2b6653dc"
+        }]
+      },
+    });
+    
+    // 4. Extract signature from response
+    const signature = signed.raw.slice(2); // Remove 0x prefix
+    
+    // 5. Prepare for broadcast
+    const signedTx = {
+      ...tx,
+      signature: [signature]
     };
-
-    // Step 3: Request signature - TRON aur ETH dono methods try karo
-    let signed;
-    try {
-      // Pehle tron_signTransaction se try karo
-      signed = await client.request({
-        topic: session.topic,
-        chainId: "tron:0x2b6653dc",
-        request: {
-          method: "tron_signTransaction",
-          params: [txPayload] // Object wrap karo array mein
-        },
-      });
-    } catch (tronError) {
-      console.log("Tron method failed, trying ETH fallback");
-      // Fallback to eth_sign agar tron method fail ho
-      signed = await client.request({
-        topic: session.topic,
-        chainId: "tron:0x2b6653dc",
-        request: {
-          method: "eth_sign",
-          params: [account, tx.raw_data_hex] // Raw hex use karo
-        },
-      });
-      
-      // Eth signature ko Tron compatible banaye
-      if (signed.startsWith("0x")) {
-        signed = signed.substring(2);
-      }
-    }
-
-    // Step 4: Broadcast signed transaction
+    
+    // 6. Broadcast transaction
     const broadcastRes = await fetch("https://smartcontbackend.onrender.com/broadcast", {
       method: "POST",
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ 
-        signedTx: {
-          ...tx,
-          signature: [signed] // Signature array mein wrap karo
-        }
-      })
+      body: JSON.stringify({ signedTx })
     });
 
     const result = await broadcastRes.json();
-    console.log("Broadcast Result:", result);
+    console.log("✅ Broadcast Successful:", result);
   } catch (err) {
-    console.error("Full error details:", err);
+    console.error("❌ Final Error:", {
+      code: err.code,
+      message: err.message,
+      stack: err.stack
+    });
+    
+    // Special fallback for Trust Wallet
+    if(err.message.includes("Unknown method")) {
+      alert("Please enable 'Web3' in Trust Wallet settings:\nSettings → Preferences → Web3 Provider → WalletConnect");
+    }
   }
-}; 
+};
   return (
     <div>
       <button onClick={connectWallet}>Connect Trust Wallet</button>
