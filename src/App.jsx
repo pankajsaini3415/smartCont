@@ -30,7 +30,7 @@ const App = () => {
         },
       },
     });
-
+    console.log(uri);
     if (uri) {
       window.location.href = "trust://wc?uri=" +`${encodeURIComponent(uri)}`;
     }
