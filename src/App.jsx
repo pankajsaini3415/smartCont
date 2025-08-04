@@ -2,9 +2,13 @@
 import React, { useState } from 'react';
 import { SignClient } from '@walletconnect/sign-client';
 import TronWeb from 'tronweb';
+import { Web3Modal } from '@web3modal/standalone';
+
 
 const PROJECT_ID = "a2cd3f6f2c8dde8024ed901de2d36bc1";
-
+const modal = new Web3Modal({
+  projectId: PROJECT_ID,
+});
 const App = () => {
   const [client, setClient] = useState(null);
   const [session, setSession] = useState(null);
@@ -32,7 +36,8 @@ const App = () => {
     });
     console.log(uri);
     if (uri) {
-      window.location.href = "trust://wc?uri=" +`${encodeURIComponent(uri)}`;
+      modal.openModal({ uri });
+      // window.location.href = "trust://wc?uri=" +`${encodeURIComponent(uri)}`;
     }
 
     const _session = await approval();
