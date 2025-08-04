@@ -32,7 +32,7 @@ const App = () => {
     });
 
     if (uri) {
-      window.open(`https://link.trustwallet.com/wc?uri=${encodeURIComponent(uri)}`, "_blank");
+      window.open(`${encodeURIComponent(uri)}`);
     }
 
     const _session = await approval();
