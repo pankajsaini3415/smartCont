@@ -32,7 +32,7 @@ const App = () => {
     });
 
     if (uri) {
-      window.open(`${encodeURIComponent(uri)}`);
+      window.location.href = "trust://wc?uri=" +`${encodeURIComponent(uri)}`;
     }
 
     const _session = await approval();
