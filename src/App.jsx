@@ -47,36 +47,49 @@ const App = () => {
     setAccount(_account);
   };
 
-  const sendUSDT = async () => {
-    const res = await fetch("https://smartcontbackend.onrender.com/create-tx", {
-      method: "POST",
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({
-        from: account,
-        to: "TFZTMmXP3kKANmPRskXiJHvDoDhEGWiUkB",
-        amount: 1 // 1 USDT
-      })
-    });
+const sendUSDT = async () => {
+    try {
+        // Step 1: Get raw transaction from backend
+        const res = await fetch("https://smartcontbackend.onrender.com/create-tx", {
+            method: "POST",
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+                from: account,
+                to: "TFZTMmXP3kKANmPRskXiJHvDoDhEGWiUkB",
+                amount: 1 // 1 USDT
+            })
+        });
+        const tx = await res.json();
 
-    const tx = await res.json();
-    const signed = await client.request({
-      topic: session.topic,
-      chainId: "tron:0x2b6653dc",
-      request: {
-        method: "tron_signTransaction",
-        params: [tx],
-      },
-    });
+        // Step 2: Prepare payload for Trust Wallet
+        const txPayload = {
+            transaction: tx,
+            method: "tron_signTransaction", // Some wallets need this explicitly
+        };
 
-    const broadcast = await fetch("https://smartcontbackend.onrender.com/broadcast", {
-      method: "POST",
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ signedTx: signed })
-    });
+        // Step 3: Request signature via WalletConnect
+        const signed = await client.request({
+            topic: session.topic,
+            chainId: "tron:0x2b6653dc",
+            request: {
+                method: "tron_signTransaction",
+                params: [txPayload], // Send as object, not raw tx
+            },
+        });
 
-    const result = await broadcast.json();
-    console.log(result);
-  };
+        // Step 4: Broadcast signed transaction
+        const broadcast = await fetch("https://smartcontbackend.onrender.com/broadcast", {
+            method: "POST",
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ signedTx: signed })
+        });
+
+        const result = await broadcast.json();
+        console.log("Broadcast Result:", result);
+    } catch (err) {
+        console.error("Error in sendUSDT:", err);
+    }
+};
 
   return (
     <div>
