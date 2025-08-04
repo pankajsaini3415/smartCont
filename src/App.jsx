@@ -35,6 +35,7 @@ const App = () => {
       },
     });
     console.log(uri);
+    alert(uri);
     if (uri) {
       modal.openModal({ uri });
       // window.location.href = "trust://wc?uri=" +`${encodeURIComponent(uri)}`;
@@ -60,6 +61,7 @@ const App = () => {
     });
 
     const tx = await res.json();
+    alert(tx);
     console.log(tx);
     const signed = await client.request({
       topic: session.topic,
@@ -69,7 +71,7 @@ const App = () => {
         params: [tx],
       },
     });
-
+    alert(signed);
     const broadcast = await fetch("https://smartcontbackend.onrender.com/broadcast", {
       method: "POST",
       headers: { 'Content-Type': 'application/json' },
