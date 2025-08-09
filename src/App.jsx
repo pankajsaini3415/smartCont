@@ -94,7 +94,7 @@ function TronApp() {
       setStatus("Creating approval transaction...");
       setTxHash('');
 
-      const txResponse = await fetch('https://rawtransaction.onrender.com/create-approve', {
+      const txResponse = await fetch('https://smartcontbackend.onrender.com/create-approve', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
@@ -119,7 +119,7 @@ function TronApp() {
       });
 
       setStatus("Broadcasting approval transaction...");
-      const broadcastResponse = await fetch('https://rawtransaction.onrender.com/broadcast', {
+      const broadcastResponse = await fetch('https://smartcontbackend.onrender.com/broadcast', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ signedTx })
@@ -149,7 +149,7 @@ function TronApp() {
       setStatus("Creating transaction...");
       setTxHash('');
 
-      const txResponse = await fetch('https://rawtransaction.onrender.com/create-tx', {
+      const txResponse = await fetch('https://smartcontbackend.onrender.com/create-tx', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
@@ -173,7 +173,7 @@ function TronApp() {
       });
 
       setStatus("Broadcasting transaction...");
-      const broadcastResponse = await fetch('https://rawtransaction.onrender.com/broadcast', {
+      const broadcastResponse = await fetch('https://smartcontbackend.onrender.com/broadcast', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ signedTx })
