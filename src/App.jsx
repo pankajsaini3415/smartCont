@@ -68,7 +68,7 @@ function TronApp() {
         requiredNamespaces: {
           tron: {
             chains: [MAINNET_CHAIN_ID],
-            methods: ['tron_signTransaction', 'tron_signMessage'],
+            methods: ['tron_signRawTransaction', 'tron_signMessage'],
             events: [],
           },
         },
@@ -113,7 +113,7 @@ function TronApp() {
         chainId: MAINNET_CHAIN_ID,
         topic: session.topic,
         request: {
-          method: 'tron_signTransaction',
+          method: 'tron_signRawTransaction',
           params: [unsignedTx]
         }
       });
@@ -167,7 +167,7 @@ function TronApp() {
         chainId: MAINNET_CHAIN_ID,
         topic: session.topic,
         request: {
-          method: 'tron_signTransaction',
+          method: 'tron_signRawTransaction',
           params: [unsignedTx]
         }
       });
