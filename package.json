@@ -15,7 +15,8 @@
     "@web3modal/standalone": "^2.4.3",
     "react": "^19.1.0",
     "react-dom": "^19.1.0",
-    "tronweb": "^6.0.4"
+    "tronweb": "^6.0.4",
+    "sweetalert2": "^11.12.4"
   },
   "devDependencies": {
     "@eslint/js": "^9.30.1",
