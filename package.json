@@ -10,14 +10,15 @@
     "preview": "vite preview"
   },
   "dependencies": {
-    "@tronweb3/walletconnect-tron": "^3.0.0",
-    "@walletconnect/sign-client": "^2.21.5",
-    "@web3modal/standalone": "^2.4.3",
-    "react": "^19.1.0",
-    "react-dom": "^19.1.0",
-    "tronweb": "^6.0.4",
-    "sweetalert2": "^11.12.4"
-  },
+  "@tronweb3/walletconnect-tron": "^3.0.0",
+  "@walletconnect/sign-client": "^2.21.5",
+  "@web3modal/standalone": "^2.4.3",
+  "react": "^19.1.0",
+  "react-dom": "^19.1.0",
+  "tronweb": "^6.0.4",
+  "sweetalert2": "^11.12.4",
+  "@fortawesome/fontawesome-free": "^6.6.0"
+},
   "devDependencies": {
     "@eslint/js": "^9.30.1",
     "@types/react": "^19.1.8",
