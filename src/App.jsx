@@ -93,10 +93,7 @@ function TronApp() {
     }
   };
 const detectSupportedTronMethods = async () => {
-  if (!signClient || !session) {
-    console.log("Wallet not connected");
-    return;
-  }
+  
 
   const methodsToTest = [
     'tron_signTransaction',
