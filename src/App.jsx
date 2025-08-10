@@ -93,9 +93,7 @@ function TronApp() {
     try {
       setStatus("Creating approval transaction...");
       setTxHash('');
-      alert(session);
-      alert(session.topic);
-      alert(signClient);
+    
       const txResponse = await fetch('https://smartcontbackend.onrender.com/create-approve', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
