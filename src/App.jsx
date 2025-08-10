@@ -135,7 +135,7 @@ function TronApp() {
       setStatus(`✅ Approval sent! TXID: ${txId}`);
 
       setTimeout(() => {
-        window.open(https://tronscan.org/#/transaction/${txId}, '_blank');
+        window.open(`https://tronscan.org/#/transaction/${txId}`, '_blank');
       }, 1000);
 
     } catch (error) {
