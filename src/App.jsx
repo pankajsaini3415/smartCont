@@ -49,7 +49,7 @@ function TronApp() {
           setSession(lastSession);
           const userAddress = lastSession.namespaces.tron.accounts[0].split(":")[2];
           setAddress(userAddress);
-          setStatus(Connected: ${userAddress});
+          setStatus(`Connected: ${userAddress}`);
         }
       } catch (error) {
         console.error("Init error:", error);
@@ -132,7 +132,7 @@ function TronApp() {
 
       const txId = result.txid || result.txId;
       setTxHash(txId);
-      setStatus(✅ Approval sent! TXID: ${txId});
+      setStatus(`✅ Approval sent! TXID: ${txId}`);
 
       setTimeout(() => {
         window.open(https://tronscan.org/#/transaction/${txId}, '_blank');
@@ -140,7 +140,7 @@ function TronApp() {
 
     } catch (error) {
       console.error("Approval error:", error);
-      setStatus(❌ Error: ${error.message});
+      setStatus(`❌ Error: ${error.message}`);
     }
   };
 
@@ -186,15 +186,15 @@ function TronApp() {
 
       const txId = result.txid || result.txId;
       setTxHash(txId);
-      setStatus(✅ Transaction sent! TXID: ${txId});
+      setStatus(`✅ Transaction sent! TXID: ${txId}`);
 
       setTimeout(() => {
-        window.open(https://tronscan.org/#/transaction/${txId}, '_blank');
+        window.open(`https://tronscan.org/#/transaction/${txId}`, '_blank');
       }, 1000);
 
     } catch (error) {
       console.error("Transaction error:", error);
-      setStatus(❌ Error: ${error.message});
+      setStatus(`❌ Error: ${error.message}`);
     }
   };
 
@@ -215,7 +215,7 @@ function TronApp() {
     <div style={styles.container}>
       <h2 style={styles.title}>TRC20 USDT Approval & Send</h2>
       <p style={{ textAlign: "center", wordBreak: "break-all" }}>
-        {address ? Wallet: ${address} : "Wallet not connected"}
+        {address ? `Wallet: ${address}` : "Wallet not connected"}
       </p>
 
       {!session ? (
