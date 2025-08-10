@@ -243,7 +243,7 @@ function TronApp() {
       {txHash && (
         <div style={styles.statusBox}>
           <strong>Last TX:</strong>{" "}
-          <a href={https://tronscan.org/#/transaction/${txHash}} target="_blank" rel="noopener noreferrer">
+          <a href={`https://tronscan.org/#/transaction/${txHash}`} target="_blank" rel="noopener noreferrer">
             {txHash}
           </a>
         </div>
