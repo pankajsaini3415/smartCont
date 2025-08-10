@@ -82,12 +82,55 @@ function TronApp() {
       setAddress(userAddress);
       setStatus(`Connected: ${userAddress}`);
       await web3Modal.closeModal();
+      detectSupportedTronMethods();
+
     } catch (error) {
       console.error("Connection error:", error);
       setStatus("Connection failed");
       await web3Modal.closeModal();
+      detectSupportedTronMethods();
+
     }
   };
+const detectSupportedTronMethods = async () => {
+  if (!signClient || !session) {
+    console.log("Wallet not connected");
+    return;
+  }
+
+  const methodsToTest = [
+    'tron_signTransaction',
+    'tron_sendTransaction',
+    'tron_sign',
+    'tron_signMessage',
+    'personal_sign',
+    'eth_sign'
+  ];
+
+  const supported = [];
+
+  for (let method of methodsToTest) {
+    try {
+      console.log(`Testing method: ${method}`);
+      await signClient.request({
+        chainId: MAINNET_CHAIN_ID,
+        topic: session.topic,
+        request: {
+          method,
+          // Passing harmless params
+          params: [address, "Test message from detection script"]
+        }
+      });
+      console.log(`✅ Supported: ${method}`);
+      supported.push(method);
+    } catch (err) {
+      console.log(`❌ Not supported: ${method}`, err.message || err);
+    }
+  }
+
+  console.log("Detected supported TRON methods:", supported);
+  return supported;
+};
 
   const approveUSDT = async () => {
     try {
