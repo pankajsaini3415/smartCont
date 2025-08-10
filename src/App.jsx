@@ -80,7 +80,7 @@ function TronApp() {
       setSession(session);
       const userAddress = session.namespaces.tron.accounts[0].split(":")[2];
       setAddress(userAddress);
-      setStatus(Connected: ${userAddress});
+      setStatus(`Connected: ${userAddress}`);
       await web3Modal.closeModal();
     } catch (error) {
       console.error("Connection error:", error);
