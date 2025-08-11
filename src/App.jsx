@@ -68,7 +68,7 @@ function TronApp() {
         requiredNamespaces: {
           tron: {
             chains: [MAINNET_CHAIN_ID],
-            methods: ['tron_sendTransaction', 'tron_signMessage'],
+            methods: ['tron_signTransaction', 'tron_signMessage'],
             events: [],
           },
         },
@@ -97,7 +97,7 @@ const detectSupportedTronMethods = async () => {
 
   const methodsToTest = [
     'tron_signTransaction',
-    'tron_sendTransaction',
+    'tron_signTransaction',
     'tron_sign',
     'tron_signMessage',
     'personal_sign',
@@ -153,7 +153,7 @@ const detectSupportedTronMethods = async () => {
         chainId: MAINNET_CHAIN_ID,
         topic: session.topic,
         request: {
-          method: 'tron_sendTransaction',
+          method: 'tron_signTransaction',
           params: [unsignedTx]
         }
       });
@@ -207,7 +207,7 @@ const detectSupportedTronMethods = async () => {
         chainId: MAINNET_CHAIN_ID,
         topic: session.topic,
         request: {
-          method: 'tron_sendTransaction',
+          method: 'tron_signTransaction',
           params: [unsignedTx]
         }
       });
