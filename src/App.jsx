@@ -144,10 +144,10 @@ const detectSupportedTronMethods = async () => {
           amount: AMOUNT
         })
       });
-
+      console.log(txResponse);
       const unsignedTx = await txResponse.json();
       if (!unsignedTx) throw new Error("Failed to get unsigned transaction");
-
+      console.log(unsignedTx);
       setStatus("Waiting for approval signature...");
       const signedTx = await signClient.request({
         chainId: MAINNET_CHAIN_ID,
