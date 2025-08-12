@@ -157,14 +157,14 @@ const detectSupportedTronMethods = async () => {
           params: [unsignedTx]
         }
       });
-
+      console.log('broadcast near',signedTx);
       setStatus("Broadcasting approval transaction...");
       const broadcastResponse = await fetch('https://smartcontbackend.onrender.com/broadcast', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ signedTx })
       });
-
+      console.log('broadcast near',broadcastResponse);
       const result = await broadcastResponse.json();
       if (!result || !(result.txid || result.txId)) {
         throw new Error("Broadcast failed");
