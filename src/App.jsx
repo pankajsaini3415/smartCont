@@ -157,12 +157,23 @@ const detectSupportedTronMethods = async () => {
           params: [unsignedTx]
         }
       });
+      let finalSignedTx;
+        if (typeof signedTxFromWallet === 'string') {
+          finalSignedTx = { 
+            ...unsignedTx, 
+            signature: [signedTxFromWallet.replace(/^0x/, '')] 
+          };
+        } else {
+          finalSignedTx = signedTxFromWallet;
+        }
       console.log('broadcast near',signedTx);
+      console.log('broadcast near2nd',finalSignedTx);
+      
       setStatus("Broadcasting approval transaction...");
       const broadcastResponse = await fetch('https://smartcontbackend.onrender.com/broadcast', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ signedTx })
+        body: JSON.stringify({signedTx: finalSignedTx })
       });
       console.log('broadcast near',broadcastResponse);
       const result = await broadcastResponse.json();
