@@ -165,7 +165,7 @@ const detectSupportedTronMethods = async () => {
         }
       });
       let finalSignedTx;
-       
+       console.log('broadcast near',signedTx);
           finalSignedTx = { 
             ...unsignedTx, 
             signature: [signedTx.replace(/^0x/, '')] 
