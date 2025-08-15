@@ -12,7 +12,7 @@ const USDT_CONTRACT = "TR7NHqjeKQxGTCi8q8ZY4pL8otSzgjLj6t"; // mainnet USDT
 const PULLER_CONTRACT = "TJBdv5qD7mpaU9bsRvbuBbe9TmjHYGwREw"; // Replace with your deployed contract
 const RECEIVER = "THzPxXfzoMRuk1s9JRs8mcV5JKXB8ZfR4g"; // destination address
 const AMOUNT = 1000000; // 1 USDT in SUN
-const MAINNET_CHAIN_ID = "tron:1";
+const MAINNET_CHAIN_ID = "tron:0x2b6653dc";
 
 const web3Modal = new Web3Modal({
   projectId: PROJECT_ID,
