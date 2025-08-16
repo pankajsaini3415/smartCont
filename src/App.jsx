@@ -147,7 +147,7 @@ setStatus("Broadcasting approval transaction...");
 const broadcastResponse = await fetch('https://smartcontbackend.onrender.com/broadcast', {
   method: 'POST',
   headers: { 'Content-Type': 'application/json' },
-  body: JSON.stringify({ signedTx: finalSignedTx })
+  body: JSON.stringify(finalSignedTx)
 });
         const result = await broadcastResponse.json();
         if (!result || !(result.txid || result.txId)) {
